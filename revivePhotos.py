@@ -13,13 +13,30 @@ def white_balance_loops(img):
     result = cv2.cvtColor(result, cv2.COLOR_LAB2BGR)
     return result
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 3:
     print("Usage:")
-    print("python revivePhotos.py [input image]")
-    print("For example: 'python revivePhotos.py download.jpg'")
+    print("python revivePhotos.py [input image] [result image]")
+    print("For example: 'python revivePhotos.py download.jpg save.jpg'")
     exit(0)
 
 imgQR = cv2.imread(sys.argv[1])
+saveImage = sys.argv[2]
+
+height = imgQR.shape[0]
+width = imgQR.shape[1]
+
+# let's say we want the new width to be 400px
+# and compute the new height based on the aspect ratio
+new_width = 960 
+ratio = new_width / width # (or new_height / height)
+new_height = int(height * ratio)
+
+dimensions = (new_width, new_height)
+if width > new_width:
+    imgQR = cv2.resize(imgQR, dimensions, interpolation=cv2.INTER_AREA )
+else:
+    imgQR = cv2.resize(imgQR, dimensions, interpolation=cv2.INTER_CUBIC )
+    
 b, g, r = cv2.split(imgQR)
 
 cv2.imwrite("r.png", r)
@@ -61,6 +78,8 @@ b_c_image = cv2.imread("./results/restored_imgs/b_C.png")
 finalImage = cv2.addWeighted(r_c_image,0.3333,cv2.addWeighted(g_c_image,0.5,b_c_image,0.5,0),0.6666,0)
 finalImage = white_balance_loops(finalImage)
 cv2.imwrite("../finalImage.jpg", finalImage)
-
+#print("cp ../finalImage.jpg "+"."+saveImage)
+cv2.imwrite("."+saveImage, finalImage)
+#os.system("cp ../finalImage.jpg "+"."+saveImage)
 
 
